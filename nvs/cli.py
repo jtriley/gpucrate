@@ -1,0 +1,4 @@
+def main():
+    """
+    nvidia-singularity
+    """
