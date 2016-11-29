@@ -1,4 +1,6 @@
+import os
 import re
+
 import sh
 
 
@@ -17,6 +19,7 @@ def get_ldconfig_cache():
     for lib in libs:
         m = r.match(lib)
         name, meta, path = m.groups()
+        realpath = os.path.realpath(path)
         parts = meta.split(', ')
         elf = parts[0]
         hwcap, abi = None, None
@@ -26,7 +29,7 @@ def get_ldconfig_cache():
             elif part.startswith(abi_prefix):
                 abi = part.split(abi_prefix)[-1].strip()
         ldcache.append(dict(name=name.strip(), elf=elf, hwcap=hwcap,
-                            abi=abi, path=path))
+                            abi=abi, path=path, realpath=realpath))
     return ldcache
 
 
