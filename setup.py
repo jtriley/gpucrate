@@ -35,4 +35,8 @@ setup(
     entry_points=dict(console_scripts=[
         'nvidia-singularity = nvs.cli:main',
     ]),
+    include_package_data=True,
+    package_data={
+        'nvs.tests': ['data/*.txt'],
+    },
 )
