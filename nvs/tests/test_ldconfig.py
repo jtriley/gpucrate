@@ -18,3 +18,8 @@ LDCACHE_DATA = utils.get_test_data('ldcache.txt')
 def test_ldcache():
     ldcache = ldconfig.get_ldconfig_cache()
     assert len(ldcache) == len(LDCACHE_DATA.splitlines()) - 1  # minus header
+
+
+def test_get_libs():
+    ldcache = ldconfig.parse_ldconfig_p(LDCACHE_DATA.splitlines()[1:])
+    assert ldconfig.get_libs(['libnvidia-tls'], ldcache=ldcache)
