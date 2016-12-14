@@ -1,3 +1,5 @@
+import os
+
 import mock
 
 from nvs import ldconfig
@@ -10,6 +12,7 @@ SH_MOCK_CMD = mock.MagicMock(return_value=SH_MOCK_INST)
 SH_MOCK.Command = SH_MOCK_CMD
 SH_MODULES = dict(sh=SH_MOCK)
 
+LDD_DATA = utils.get_test_data('ldd.txt')
 LDCACHE_DATA = utils.get_test_data('ldcache.txt')
 
 
@@ -36,3 +39,20 @@ def test_get_libs():
     libs = ldconfig.get_libs(['libxcb-res.so.0'], ldcache=ldcache)
     libs32 = libs['lib32']
     assert libs32
+
+
+@mock.patch.object(ldconfig, 'sh', SH_MOCK)
+@mock.patch.object(SH_MOCK_RESULT, 'stdout', LDD_DATA)
+def test_ldd():
+    ldd = ldconfig.ldd('/usr/lib64/libcuda.so')
+    print ldd
+    libs = [
+        'libdl.so.2',
+        'libpthread.so.0',
+        'librt.so.1',
+        'libm.so.6',
+        'libc.so.6',
+    ]
+    for lib in libs:
+        assert lib in ldd
+        assert ldd[lib] == os.path.join('/usr/lib64', lib)
