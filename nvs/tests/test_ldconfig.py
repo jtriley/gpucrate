@@ -33,3 +33,6 @@ def test_get_libs():
         if lib['hwcap']:
             assert lib['hwcap'] == '0x8000000000000000'
         assert lib['abi'].startswith('Linux 2.')
+    libs = ldconfig.get_libs(['libxcb-res.so.0'], ldcache=ldcache)
+    libs32 = libs['lib32']
+    assert libs32
