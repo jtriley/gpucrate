@@ -3,13 +3,14 @@ import os
 import distutils.spawn
 
 import pynvml
-pynvml.nvmlInit()
 
 
 def get_driver_version():
     """
     Return current NVIDIA driver version
     """
+    if not pynvml._nvmlLib_refcount:
+        pynvml.nvmlInit()
     return pynvml.nvmlSystemGetDriverVersion()
 
 
