@@ -22,4 +22,14 @@ def test_ldcache():
 
 def test_get_libs():
     ldcache = ldconfig.parse_ldconfig_p(LDCACHE_DATA.splitlines()[1:])
-    assert ldconfig.get_libs(['libnvidia-tls'], ldcache=ldcache)
+    libs = ldconfig.get_libs(['libnvidia-tls'], ldcache=ldcache)
+    libs64 = libs['lib64']
+    libs32 = libs['lib32']
+    assert len(libs32) == 0
+    assert len(libs64) == 3
+    for lib in libs64:
+        assert lib['name'].startswith('libnvidia-tls')
+        assert lib['elf'] == 'libc6,x86-64'
+        if lib['hwcap']:
+            assert lib['hwcap'] == '0x8000000000000000'
+        assert lib['abi'].startswith('Linux 2.')
