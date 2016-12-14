@@ -45,7 +45,6 @@ def test_get_libs():
 @mock.patch.object(SH_MOCK_RESULT, 'stdout', LDD_DATA)
 def test_ldd():
     ldd = ldconfig.ldd('/usr/lib64/libcuda.so')
-    print ldd
     libs = [
         'libdl.so.2',
         'libpthread.so.0',
