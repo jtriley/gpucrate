@@ -68,10 +68,10 @@ def ldd(lib_path):
     Returns dictionary of ldd on a library path
     """
     ldd = sh.Command('ldd')
-    ldd_out = ldd(lib_path)
+    ldd_out = ldd(lib_path).stdout.splitlines()
     libraries = {}
-    for line in ldd_out.splitlines():
-        match = re.match(r'(.*) => (.*) \(0x', line)
+    for line in ldd_out:
+        match = re.match(r'([^\s]+) => ([^\s]+) \(0x', line)
         if match:
             libraries[match.group(1).strip()] = match.group(2)
     return libraries
