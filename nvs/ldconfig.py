@@ -4,7 +4,7 @@ import re
 import sh
 
 
-def get_ldconfig_cache():
+def get_ldconfig_cache(follow_links=False):
     """
     Returns dictionary representation of ldconfig -p
 
@@ -12,14 +12,15 @@ def get_ldconfig_cache():
     """
     ldconfig = sh.Command('ldconfig')
     libs = ldconfig('-p').stdout.splitlines()[1:]
-    ldcache = []
+    ldcache = {} if follow_links else []
     r = re.compile('^(.*) \((.*)\) => (.*)$')
     hwcap_prefix = 'hwcap:'
     abi_prefix = 'OS ABI:'
     for lib in libs:
         m = r.match(lib)
         name, meta, path = m.groups()
-        realpath = os.path.realpath(path)
+        if follow_links:
+            path = os.path.realpath(path)
         parts = meta.split(', ')
         elf = parts[0]
         hwcap, abi = None, None
@@ -28,16 +29,23 @@ def get_ldconfig_cache():
                 hwcap = part.split(hwcap_prefix)[-1].strip()
             elif part.startswith(abi_prefix):
                 abi = part.split(abi_prefix)[-1].strip()
-        ldcache.append(dict(name=name.strip(), elf=elf, hwcap=hwcap,
-                            abi=abi, path=path, realpath=realpath))
-    return ldcache
+        if follow_links:
+            ldcache[path] = dict(name=name.strip(), elf=elf, hwcap=hwcap,
+                                 abi=abi, path=path)
+        else:
+            ldcache.append(dict(name=name.strip(), elf=elf, hwcap=hwcap,
+                                abi=abi, path=path))
+    if follow_links:
+        return ldcache.values()
+    else:
+        return ldcache
 
 
-def get_libs(names):
+def get_libs(names, follow_links=False):
     """
     Returns map of 32bit and 64bit libs matching names
     """
-    ldcache = get_ldconfig_cache()
+    ldcache = get_ldconfig_cache(follow_links=follow_links)
     libs = {
         'lib32': [],
         'lib64': [],
