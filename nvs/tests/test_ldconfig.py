@@ -10,7 +10,6 @@ SH_MOCK_RESULT = mock.MagicMock()
 SH_MOCK_INST = mock.MagicMock(return_value=SH_MOCK_RESULT)
 SH_MOCK_CMD = mock.MagicMock(return_value=SH_MOCK_INST)
 SH_MOCK.Command = SH_MOCK_CMD
-SH_MODULES = dict(sh=SH_MOCK)
 
 LDD_DATA = utils.get_test_data('ldd.txt')
 LDCACHE_DATA = utils.get_test_data('ldcache.txt')
