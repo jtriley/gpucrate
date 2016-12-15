@@ -1,0 +1,28 @@
+
+Dynamic section at offset 0xd01298 contains 25 entries:
+  Tag        Type                         Name/Value
+ 0x0000000000000001 (NEEDED)             Shared library: [libdl.so.2]
+ 0x0000000000000001 (NEEDED)             Shared library: [libpthread.so.0]
+ 0x0000000000000001 (NEEDED)             Shared library: [librt.so.1]
+ 0x0000000000000001 (NEEDED)             Shared library: [libm.so.6]
+ 0x0000000000000001 (NEEDED)             Shared library: [libc.so.6]
+ 0x000000000000000e (SONAME)             Library soname: [libcuda.so.1]
+ 0x000000000000000c (INIT)               0x110618
+ 0x000000000000000d (FINI)               0x88d178
+ 0x0000000000000004 (HASH)               0x158
+ 0x0000000000000005 (STRTAB)             0x4930
+ 0x0000000000000006 (SYMTAB)             0x12a0
+ 0x000000000000000a (STRSZ)              9370 (bytes)
+ 0x000000000000000b (SYMENT)             24 (bytes)
+ 0x0000000000000003 (PLTGOT)             0xf072d0
+ 0x0000000000000002 (PLTRELSZ)           5376 (bytes)
+ 0x0000000000000014 (PLTREL)             RELA
+ 0x0000000000000017 (JMPREL)             0x10f118
+ 0x0000000000000007 (RELA)               0x72f8
+ 0x0000000000000008 (RELASZ)             1080864 (bytes)
+ 0x0000000000000009 (RELAENT)            24 (bytes)
+ 0x000000006ffffffe (VERNEED)            0x7258
+ 0x000000006fffffff (VERNEEDNUM)         5
+ 0x000000006ffffff0 (VERSYM)             0x6dca
+ 0x000000006ffffff9 (RELACOUNT)          45002
+ 0x0000000000000000 (NULL)               0x0
