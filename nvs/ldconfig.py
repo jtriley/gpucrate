@@ -4,20 +4,21 @@ import re
 import sh
 
 
-def parse_ldconfig_p(data):
+def parse_ldconfig_p(data, follow_links=False):
     """
-    Returns dictionary representation of ldconfig -p output
+    Returns dictionary representation of ldconfig -p
 
     NOTE: This is a nasty hack but works for now
     """
-    ldcache = []
+    ldcache = {} if follow_links else []
     r = re.compile('^(.*) \((.*)\) => (.*)$')
     hwcap_prefix = 'hwcap:'
     abi_prefix = 'OS ABI:'
     for line in data:
         m = r.match(line)
         name, meta, path = m.groups()
-        realpath = os.path.realpath(path)
+        if follow_links:
+            path = os.path.realpath(path)
         parts = meta.split(', ')
         elf = parts[0]
         hwcap, abi = None, None
@@ -26,25 +27,32 @@ def parse_ldconfig_p(data):
                 hwcap = part.split(hwcap_prefix)[-1].strip()
             elif part.startswith(abi_prefix):
                 abi = part.split(abi_prefix)[-1].strip()
-        ldcache.append(dict(name=name.strip(), elf=elf, hwcap=hwcap,
-                            abi=abi, path=path, realpath=realpath))
-    return ldcache
+        if follow_links:
+            ldcache[path] = dict(name=name.strip(), elf=elf, hwcap=hwcap,
+                                 abi=abi, path=path)
+        else:
+            ldcache.append(dict(name=name.strip(), elf=elf, hwcap=hwcap,
+                                abi=abi, path=path))
+    if follow_links:
+        return ldcache.values()
+    else:
+        return ldcache
 
 
-def get_ldconfig_cache():
+def get_ldconfig_cache(follow_links=False):
     """
     Fetch and return dictionary representation of ldconfig -p
     """
     ldconfig = sh.Command('ldconfig')
     libs = ldconfig('-p').stdout.splitlines()[1:]
-    return parse_ldconfig_p(libs)
+    return parse_ldconfig_p(libs, follow_links=follow_links)
 
 
-def get_libs(names, ldcache=None):
+def get_libs(names, ldcache=None, follow_links=False):
     """
     Returns map of 32bit and 64bit libs matching names
     """
-    ldcache = ldcache or get_ldconfig_cache()
+    ldcache = ldcache or get_ldconfig_cache(follow_links=follow_links)
     libs = {
         'lib32': [],
         'lib64': [],

@@ -1,11 +1,14 @@
 import os
 import re
 
-from sh import ld
-
 from nvs import utils
 from nvs import ldconfig
+from nvs import readelf
 
+
+BIN_DIR = 'bin'
+LIB32_DIR = 'lib'
+LIB64_DIR = 'lib64'
 
 VOLUMES = [
     {
@@ -77,6 +80,9 @@ VOLUMES = [
 
 
 def blacklisted(f, abi):
+    """
+    Returns True/False based on whether the library has been blacklisted or not
+    """
     lib = re.compile('^.*/lib([\w-]+)\.so[\d.]*$')
     glcore = re.compile('libnvidia-e?glcore\.so')
     gldispatch = re.compile('libGLdispatch\.so')
@@ -112,6 +118,54 @@ def lookup_volumes():
             bins = [utils.which(binary) for binary in binaries]
             vol['binaries'] = bins
         if libraries:
-            vol['libraries'] = ldconfig.get_libs(libraries)
+            libs = ldconfig.get_libs(libraries, follow_links=True)
+            lib32 = [i for i in libs['lib32']
+                     if not blacklisted(i['path'], i['abi'])]
+            lib64 = [i for i in libs['lib64']
+                     if not blacklisted(i['path'], i['abi'])]
+            libs['lib32'] = lib32
+            libs['lib64'] = lib64
+            vol['libraries'] = libs
         vols[name] = vol
     return vols
+
+
+def create(path, volume):
+    """
+    Create
+    """
+    version = volume['version']
+    root = os.path.join(path, version)
+    bin_dir = os.path.join(root, BIN_DIR)
+    lib32_dir = os.path.join(root, LIB32_DIR)
+    lib64_dir = os.path.join(root, LIB64_DIR)
+    for d in [bin_dir, lib32_dir, lib64_dir]:
+        os.makedirs(d, 0755)
+    binaries = volume['binaries']
+    libraries = volume['libraries']
+    lib32 = libraries['lib32']
+    lib64 = libraries['lib64']
+    for exe in binaries:
+        os.link(exe, os.path.join(bin_dir, os.path.basename(exe)))
+    for libs, dest_dir in [(lib32, lib32_dir), (lib64, lib64_dir)]:
+        for lib in libs:
+            path = lib['path']
+            basename = os.path.basename(path)
+            hardlink_dest = os.path.join(dest_dir, basename)
+            if not os.path.isfile(hardlink_dest):
+                os.link(path, hardlink_dest)
+            soname = readelf.get_soname(path)
+            if soname and soname != basename:
+                solink = os.path.join(dest_dir, soname)
+                if not os.path.islink(solink):
+                    os.symlink(basename, solink)
+            if soname:
+                if basename.split('.')[0] == 'libcuda':
+                    cuda_link = os.path.join(dest_dir, 'libcuda.so')
+                    if not os.path.islink(cuda_link):
+                        os.symlink(basename, cuda_link)
+                if basename.split('.')[0] == 'libGLX_nvidia':
+                    glx_link = os.path.join(dest_dir, basename.replace(
+                            'GLX_nvidia', 'GLX_indirect'))
+                    if not os.path.islink(glx_link):
+                        os.symlink(basename, glx_link)
