@@ -15,65 +15,67 @@ VOLUMES = [
         "name": "nvidia_driver",
         "path": "/usr/local/nvidia",
         "binaries": {
-            #"nvidia-modprobe",        # Kernel module loader
-            #"nvidia-settings",        # X server settings
-            #"nvidia-xconfig",         # X xorg.conf editor
-            "nvidia-cuda-mps-control", # Multi process service CLI
-            "nvidia-cuda-mps-server",  # Multi process service server
-            "nvidia-debugdump",        # GPU coredump utility
-            "nvidia-persistenced",     # Persistence mode utility
-            "nvidia-smi",              # System management interface
+            # "nvidia-modprobe",        # Kernel module loader
+            # "nvidia-settings",        # X server settings
+            # "nvidia-xconfig",         # X xorg.conf editor
+            "nvidia-cuda-mps-control",  # Multi process service CLI
+            "nvidia-cuda-mps-server",   # Multi process service server
+            "nvidia-debugdump",         # GPU coredump utility
+            "nvidia-persistenced",      # Persistence mode utility
+            "nvidia-smi",               # System management interface
         },
         "libraries": {
             # ------- X11 -------
 
-            #"libnvidia-cfg.so",  # GPU configuration (used by nvidia-xconfig)
-            #"libnvidia-gtk2.so", # GTK2 (used by nvidia-settings)
-            #"libnvidia-gtk3.so", # GTK3 (used by nvidia-settings)
-            #"libnvidia-wfb.so",  # Wrapped software rendering module for X server
-            #"libglx.so",         # GLX extension module for X server
+            # "libnvidia-cfg.so",  # GPU configuration (used by nvidia-xconfig)
+            # "libnvidia-gtk2.so", # GTK2 (used by nvidia-settings)
+            # "libnvidia-gtk3.so", # GTK3 (used by nvidia-settings)
+            # "libnvidia-wfb.so",  # Wrapped software rendering module for X server # noqa: E501
+            # "libglx.so",         # GLX extension module for X server
 
             # ----- Compute -----
 
-            "libnvidia-ml.so",              # Management library
-            "libcuda.so",                   # CUDA driver library
-            "libnvidia-ptxjitcompiler.so",  # PTX-SASS JIT compiler (used by libcuda)
-            "libnvidia-fatbinaryloader.so", # fatbin loader (used by libcuda)
-            "libnvidia-opencl.so",          # NVIDIA OpenCL ICD
-            "libnvidia-compiler.so",        # NVVM-PTX compiler for OpenCL (used by libnvidia-opencl)
-            #"libOpenCL.so",                # OpenCL ICD loader
+            "libnvidia-ml.so",               # Management library
+            "libcuda.so",                    # CUDA driver library
+            "libnvidia-ptxjitcompiler.so",   # PTX-SASS JIT compiler (used by libcuda) # noqa: E501
+            "libnvidia-fatbinaryloader.so",  # fatbin loader (used by libcuda)
+            "libnvidia-opencl.so",           # NVIDIA OpenCL ICD
+            "libnvidia-compiler.so",         # NVVM-PTX compiler for OpenCL (used by libnvidia-opencl) # noqa: E501
+            # "libOpenCL.so",                # OpenCL ICD loader
 
             # ------ Video ------
 
-            "libvdpau_nvidia.so",  # NVIDIA VDPAU ICD
-            "libnvidia-encode.so", # Video encoder
-            "libnvcuvid.so",       # Video decoder
-            "libnvidia-fbc.so",    # Framebuffer capture
-            "libnvidia-ifr.so",    # OpenGL framebuffer capture
+            "libvdpau_nvidia.so",   # NVIDIA VDPAU ICD
+            "libnvidia-encode.so",  # Video encoder
+            "libnvcuvid.so",        # Video decoder
+            "libnvidia-fbc.so",     # Framebuffer capture
+            "libnvidia-ifr.so",     # OpenGL framebuffer capture
 
             # ----- Graphic -----
 
-            # XXX In an ideal world we would only mount nvidia_* vendor specific libraries and
-            # install ICD loaders inside the container. However, for backward compatibility reason
-            # we need to mount everything. This will hopefully change once GLVND is well established.
+            # XXX In an ideal world we would only mount nvidia_* vendor
+            # specific libraries and install ICD loaders inside the container.
+            # However, for backward compatibility reason we need to mount
+            # everything. This will hopefully change once GLVND is well
+            # established.
 
-            "libGL.so",         # OpenGL/GLX legacy _or_ compatibility wrapper (GLVND)
-            "libGLX.so",        # GLX ICD loader (GLVND)
-            "libOpenGL.so",     # OpenGL ICD loader (GLVND)
-            "libGLESv1_CM.so",  # OpenGL ES v1 common profile legacy _or_ ICD loader (GLVND)
-            "libGLESv2.so",     # OpenGL ES v2 legacy _or_ ICD loader (GLVND)
-            "libEGL.so",        # EGL ICD loader
-            "libGLdispatch.so", # OpenGL dispatch (GLVND) (used by libOpenGL, libEGL and libGLES*)
+            "libGL.so",          # OpenGL/GLX legacy _or_ compatibility wrapper (GLVND) # noqa: E501
+            "libGLX.so",         # GLX ICD loader (GLVND)
+            "libOpenGL.so",      # OpenGL ICD loader (GLVND)
+            "libGLESv1_CM.so",   # OpenGL ES v1 common profile legacy _or_ ICD loader (GLVND) # noqa: E501
+            "libGLESv2.so",      # OpenGL ES v2 legacy _or_ ICD loader (GLVND)
+            "libEGL.so",         # EGL ICD loader
+            "libGLdispatch.so",  # OpenGL dispatch (GLVND) (used by libOpenGL, libEGL and libGLES*) # noqa: E501
 
-            "libGLX_nvidia.so",         # OpenGL/GLX ICD (GLVND)
-            "libEGL_nvidia.so",         # EGL ICD (GLVND)
-            "libGLESv2_nvidia.so",      # OpenGL ES v2 ICD (GLVND)
-            "libGLESv1_CM_nvidia.so",   # OpenGL ES v1 common profile ICD (GLVND)
-            "libnvidia-eglcore.so",     # EGL core (used by libGLES* or libGLES*_nvidia and libEGL_nvidia)
-            "libnvidia-egl-wayland.so", # EGL wayland extensions (used by libEGL_nvidia)
-            "libnvidia-glcore.so",      # OpenGL core (used by libGL or libGLX_nvidia)
-            "libnvidia-tls.so",         # Thread local storage (used by libGL or libGLX_nvidia)
-            "libnvidia-glsi.so",        # OpenGL system interaction (used by libEGL_nvidia)
+            "libGLX_nvidia.so",          # OpenGL/GLX ICD (GLVND)
+            "libEGL_nvidia.so",          # EGL ICD (GLVND)
+            "libGLESv2_nvidia.so",       # OpenGL ES v2 ICD (GLVND)
+            "libGLESv1_CM_nvidia.so",    # OpenGL ES v1 common profile ICD (GLVND) # noqa: E501
+            "libnvidia-eglcore.so",      # EGL core (used by libGLES* or libGLES*_nvidia and libEGL_nvidia) # noqa: E501
+            "libnvidia-egl-wayland.so",  # EGL wayland extensions (used by libEGL_nvidia) # noqa: E501
+            "libnvidia-glcore.so",       # OpenGL core (used by libGL or libGLX_nvidia) # noqa: E501
+            "libnvidia-tls.so",          # Thread local storage (used by libGL or libGLX_nvidia) # noqa: E501
+            "libnvidia-glsi.so",         # OpenGL system interaction (used by libEGL_nvidia) # noqa: E501
         },
     }
 ]
@@ -166,6 +168,6 @@ def create(path, volume):
                         os.symlink(basename, cuda_link)
                 if basename.split('.')[0] == 'libGLX_nvidia':
                     glx_link = os.path.join(dest_dir, basename.replace(
-                            'GLX_nvidia', 'GLX_indirect'))
+                        'GLX_nvidia', 'GLX_indirect'))
                     if not os.path.islink(glx_link):
                         os.symlink(basename, glx_link)
