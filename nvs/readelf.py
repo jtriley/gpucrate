@@ -2,6 +2,7 @@ import re
 
 import sh
 
+
 def get_soname(lib):
     readelf = sh.Command('readelf')
     r = re.compile('Library\s+soname:\s+\[(.+)\]')
