@@ -4,20 +4,18 @@ import re
 import sh
 
 
-def get_ldconfig_cache():
+def parse_ldconfig_p(data):
     """
-    Returns dictionary representation of ldconfig -p
+    Returns dictionary representation of ldconfig -p output
 
     NOTE: This is a nasty hack but works for now
     """
-    ldconfig = sh.Command('ldconfig')
-    libs = ldconfig('-p').stdout.splitlines()[1:]
     ldcache = []
     r = re.compile('^(.*) \((.*)\) => (.*)$')
     hwcap_prefix = 'hwcap:'
     abi_prefix = 'OS ABI:'
-    for lib in libs:
-        m = r.match(lib)
+    for line in data:
+        m = r.match(line)
         name, meta, path = m.groups()
         realpath = os.path.realpath(path)
         parts = meta.split(', ')
@@ -33,11 +31,20 @@ def get_ldconfig_cache():
     return ldcache
 
 
-def get_libs(names):
+def get_ldconfig_cache():
+    """
+    Fetch and return dictionary representation of ldconfig -p
+    """
+    ldconfig = sh.Command('ldconfig')
+    libs = ldconfig('-p').stdout.splitlines()[1:]
+    return parse_ldconfig_p(libs)
+
+
+def get_libs(names, ldcache=None):
     """
     Returns map of 32bit and 64bit libs matching names
     """
-    ldcache = get_ldconfig_cache()
+    ldcache = ldcache or get_ldconfig_cache()
     libs = {
         'lib32': [],
         'lib64': [],
@@ -61,10 +68,10 @@ def ldd(lib_path):
     Returns dictionary of ldd on a library path
     """
     ldd = sh.Command('ldd')
-    ldd_out = ldd(lib_path)
+    ldd_out = ldd(lib_path).stdout.splitlines()
     libraries = {}
-    for line in ldd_out.splitlines():
-        match = re.match(r'(.*) => (.*) \(0x', line)
+    for line in ldd_out:
+        match = re.match(r'([^\s]+) => ([^\s]+) \(0x', line)
         if match:
             libraries[match.group(1).strip()] = match.group(2)
     return libraries

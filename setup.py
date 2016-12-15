@@ -22,7 +22,21 @@ setup(
         "sh>=1.11",
         "nvidia-ml-py>=7.352.0",
     ],
+    setup_requires=[
+        'pytest-runner>=2.9'
+    ],
+    tests_require=[
+        "pytest>=3.0.3",
+        "pytest-cov>=2.4.0",
+        "pytest-flake8>=0.7",
+        "testfixtures>=4.10.0",
+        "mock>=2.0.0",
+    ],
     entry_points=dict(console_scripts=[
         'nvidia-singularity = nvs.cli:main',
     ]),
+    include_package_data=True,
+    package_data={
+        'nvs.tests': ['data/*.txt'],
+    },
 )
