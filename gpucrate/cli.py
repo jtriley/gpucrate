@@ -1,7 +1,7 @@
 import argparse
 
-from nvs import utils
-from nvs import logger
+from gpucrate import utils
+from gpucrate import logger
 
 
 def shell(args, **kwargs):
@@ -9,9 +9,10 @@ def shell(args, **kwargs):
     utils.shell(local_ns=ns)
 
 
-def get_parser():
+def get_gpucrate_parser():
     parser = argparse.ArgumentParser(
-        description='nvidia-singularity - NVIDIA support for Singularity')
+        prog='gpucrate',
+        description='creates GPU driver volumes for containers')
     parser.add_argument('--debug', required=False,
                         action='store_true', default=False,
                         help='enable debug output')
@@ -22,7 +23,7 @@ def get_parser():
 
 
 def main(**kwargs):
-    parser = get_parser()
+    parser = get_gpucrate_parser()
     args = parser.parse_args(args=kwargs.pop('args', None))
-    logger.configure_nvs_logging(debug=args.debug)
+    logger.configure_gpucrate_logging(debug=args.debug)
     args.func(args, **kwargs)

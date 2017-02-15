@@ -3,7 +3,7 @@ import mock
 from sh import which
 from sh import realpath
 
-from nvs import utils
+from gpucrate import utils
 
 NV_DRIVER_VERSION = '352.93'
 PYNVML_MOCK = mock.MagicMock()
