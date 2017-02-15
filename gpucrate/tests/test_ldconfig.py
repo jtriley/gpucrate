@@ -2,8 +2,8 @@ import os
 
 import mock
 
-from nvs import ldconfig
-from nvs.tests import utils
+from gpucrate import ldconfig
+from gpucrate.tests import utils
 
 SH_MOCK = mock.MagicMock()
 SH_MOCK_RESULT = mock.MagicMock()

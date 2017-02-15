@@ -2,20 +2,20 @@ import logging
 
 from testfixtures import LogCapture
 
-from nvs import logger
+from gpucrate import logger
 
 
-def test_nvs_logger():
+def test_gpucrate_logger():
     assert not logger.log.handlers
     with LogCapture() as log_capture:
-        logger.configure_nvs_logging()
+        logger.configure_gpucrate_logging()
         assert logger.log.handlers
         assert logger.console.level == logging.INFO
         logger.log.info('test')
-        logger.configure_nvs_logging(debug=True)
+        logger.configure_gpucrate_logging(debug=True)
         assert logger.console.level == logging.DEBUG
         logger.log.debug('test')
     log_capture.check(
-        ('nvs', 'INFO', 'test'),
-        ('nvs', 'DEBUG', 'test'),
+        ('gpucrate', 'INFO', 'test'),
+        ('gpucrate', 'DEBUG', 'test'),
     )

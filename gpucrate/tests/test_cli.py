@@ -2,8 +2,8 @@ import pytest
 
 import mock
 
-from nvs import cli
-from nvs.tests import test_shell
+from gpucrate import cli
+from gpucrate.tests import test_shell
 
 
 def test_cli_help():

@@ -4,19 +4,20 @@ import os
 from setuptools import setup, find_packages
 
 VERSION = 0.1
-version = os.path.join('nvs', '__init__.py')
+version = os.path.join('gpucrate', '__init__.py')
 execfile(version)
 
 README = open('README.md').read()
 
 setup(
-    name='nvidia-singularity',
+    name='gpucrate',
     version=VERSION,
     packages=find_packages(),
     author='Justin Riley',
     author_email='justin_riley@harvard.edu',
-    url="https://github.com/fasrc/nvidia-singularity",
-    description="Utilities to build and run NVIDIA Singularity images",
+    url="https://github.com/fasrc/gpucrate",
+    description=("gpucrate creates hard-linked GPU driver volumes "
+                 "for use with docker, singularity, etc."),
     long_description=README,
     install_requires=[
         "sh>=1.11",
@@ -33,10 +34,10 @@ setup(
         "mock>=2.0.0",
     ],
     entry_points=dict(console_scripts=[
-        'nvidia-singularity = nvs.cli:main',
+        'gpucrate = gpucrate.cli:main',
     ]),
     include_package_data=True,
     package_data={
-        'nvs.tests': ['data/*.txt'],
+        'gpucrate.tests': ['data/*.txt'],
     },
 )

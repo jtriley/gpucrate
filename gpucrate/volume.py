@@ -1,9 +1,9 @@
 import os
 import re
 
-from nvs import utils
-from nvs import ldconfig
-from nvs import readelf
+from gpucrate import utils
+from gpucrate import ldconfig
+from gpucrate import readelf
 
 
 BIN_DIR = 'bin'

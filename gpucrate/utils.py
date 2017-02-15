@@ -4,7 +4,7 @@ import distutils.spawn
 
 import pynvml
 
-from nvs.logger import log
+from gpucrate.logger import log
 
 
 def get_driver_version():
