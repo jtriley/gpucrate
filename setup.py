@@ -22,6 +22,7 @@ setup(
     install_requires=[
         "sh>=1.11",
         "nvidia-ml-py>=7.352.0",
+        "PyYAML>=3.11",
     ],
     setup_requires=[
         'pytest-runner>=2.9'
