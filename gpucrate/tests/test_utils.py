@@ -1,3 +1,4 @@
+import os
 import sys
 
 import mock
@@ -31,7 +32,7 @@ def test_get_driver_version():
 
 
 def test_which():
-    progs = ['ls', 'cd', 'which', 'cat', 'grep', 'find']
+    progs = os.listdir('/usr/bin')[:10]
     for prog in progs:
         assert utils.which(prog) == realpath(which(prog)).stdout.strip()
 
