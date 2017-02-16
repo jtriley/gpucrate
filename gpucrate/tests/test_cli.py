@@ -23,7 +23,7 @@ SINGULARITY = mock.MagicMock(
     side_effect=FAKE_ERROR_RETURN_CODE)
 
 
-def test_cli_help():
+def test_help():
     with pytest.raises(SystemExit):
         cli.main(args=['--help'])
 
