@@ -1,7 +1,6 @@
 import os
 
-import distutils.spawn
-
+import sh
 import pynvml
 
 from gpucrate.logger import log
@@ -20,7 +19,7 @@ def which(prog):
     """
     Returns realpath of program
     """
-    return os.path.realpath(distutils.spawn.find_executable(prog))
+    return os.path.realpath(sh.Command(prog)._path)
 
 
 def shell(local_ns={}):
@@ -33,3 +32,14 @@ def shell(local_ns={}):
     except ImportError as e:
         log.error("Unable to load IPython:\n\n%s\n" % e)
         log.error("Please check that IPython is installed and working.")
+
+
+def debugger():
+    """
+    Drop to a debugger using pudb if available and pdb if not
+    """
+    try:
+        import pudb as pdb
+    except ImportError:
+        import pdb
+    return pdb

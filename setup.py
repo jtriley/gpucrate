@@ -22,6 +22,7 @@ setup(
     install_requires=[
         "sh>=1.11",
         "nvidia-ml-py>=7.352.0",
+        "PyYAML>=3.11",
     ],
     setup_requires=[
         'pytest-runner>=2.9'
@@ -35,6 +36,7 @@ setup(
     ],
     entry_points=dict(console_scripts=[
         'gpucrate = gpucrate.cli:main',
+        'singularity-gpu = gpucrate.cli:singularity_gpu',
     ]),
     include_package_data=True,
     package_data={

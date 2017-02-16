@@ -1,10 +1,12 @@
 import logging
 
+import mock
 from testfixtures import LogCapture
 
 from gpucrate import logger
 
 
+@mock.patch.object(logger.log, 'handlers', [])
 def test_gpucrate_logger():
     assert not logger.log.handlers
     with LogCapture() as log_capture:
