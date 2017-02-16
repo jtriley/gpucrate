@@ -16,7 +16,7 @@ def load(path=DEFAULT_CONFIG_PATH):
             cfg=path))
     else:
         with open(path) as f:
-            globals()['_CONFIG'].update(yaml.load(f))
+            globals()['_CONFIG'].update(yaml.load(f) or {})
     globals()['_LOADED'] = True
 
 
