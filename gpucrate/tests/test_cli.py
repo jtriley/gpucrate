@@ -1,4 +1,5 @@
 import os
+import sys
 
 import sh
 import mock
@@ -6,12 +7,15 @@ import pytest
 import testfixtures
 
 from gpucrate import cli
+from gpucrate import utils
 from gpucrate import config
 from gpucrate import exception
 
 
 ROOT = mock.MagicMock(return_value=0)
 NON_ROOT = mock.MagicMock(return_value=1)
+PDB = mock.MagicMock()
+PDB.set_trace = mock.MagicMock(side_effect=sys.exit)
 SHELL = mock.MagicMock()
 
 
@@ -26,6 +30,14 @@ def test_shell():
     SHELL.reset_mock()
     cli.main(args=['shell'], test=True)
     SHELL.assert_called_once_with(local_ns=dict(log=cli.logger.log))
+
+
+@mock.patch.object(utils, 'debugger', mock.MagicMock(return_value=PDB))
+def test_debug():
+    PDB.set_trace.reset_mock()
+    with pytest.raises(SystemExit):
+        cli.main(args=['--debug', 'create'])
+    PDB.set_trace.assert_called_once()
 
 
 @mock.patch.dict('os.environ', PATH='')

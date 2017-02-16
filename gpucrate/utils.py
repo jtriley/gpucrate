@@ -32,3 +32,14 @@ def shell(local_ns={}):
     except ImportError as e:
         log.error("Unable to load IPython:\n\n%s\n" % e)
         log.error("Please check that IPython is installed and working.")
+
+
+def debugger():
+    """
+    Drop to a debugger using pudb if available and pdb if not
+    """
+    try:
+        import pudb as pdb
+    except ImportError:
+        import pdb
+    return pdb

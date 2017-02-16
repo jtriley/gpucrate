@@ -54,3 +54,15 @@ def test_without_ipython():
         ('gpucrate', 'ERROR',
          'Please check that IPython is installed and working.'),
     )
+
+
+@mock.patch.dict('sys.modules', pudb=PUDB)
+def test_with_pudb():
+    pdb = utils.debugger()
+    assert pdb == PUDB
+
+
+@mock.patch.object(sys, 'path', [])
+def test_without_pudb():
+    pdb = utils.debugger()
+    assert sys.modules.get('pdb') == pdb

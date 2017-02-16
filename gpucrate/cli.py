@@ -38,7 +38,11 @@ def main(**kwargs):
     parser = get_gpucrate_parser()
     args = parser.parse_args(args=kwargs.pop('args', None))
     args_dict = vars(args)
+    debug = args_dict.pop('debug')
     logger.configure_gpucrate_logging(debug=debug)
+    if debug:
+        pdb = utils.debugger()
+        pdb.set_trace()
     try:
         args.func(**args_dict)
     except sh.CommandNotFound as e:
