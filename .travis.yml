@@ -5,6 +5,8 @@ python:
     - 2.7
 install:
     - pip install -U setuptools
+    - pip install -r requirements/install.txt
+    - pip install -r requirements/test.txt
     - python setup.py install --quiet
 script:
     - python setup.py test
