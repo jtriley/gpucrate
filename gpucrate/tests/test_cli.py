@@ -3,7 +3,9 @@ import pytest
 import mock
 
 from gpucrate import cli
-from gpucrate.tests import test_shell
+
+
+SHELL = mock.MagicMock()
 
 
 def test_cli_help():
@@ -11,9 +13,9 @@ def test_cli_help():
         cli.main(args=['--help'])
 
 
-@mock.patch.dict('sys.modules', test_shell.IPY_MODULES)
+@mock.patch.object(cli.utils, 'shell', SHELL)
 @mock.patch.object(cli, 'logger', mock.MagicMock())
-def test_cli_subcmd_shell():
-    test_shell.IPY.embed.reset_mock()
+def test_shell():
+    SHELL.reset_mock()
     cli.main(args=['shell'], test=True)
-    test_shell.IPY.embed.assert_called_once()
+    SHELL.assert_called_once_with(local_ns=dict(log=cli.logger.log))
