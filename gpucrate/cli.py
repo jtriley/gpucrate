@@ -1,4 +1,5 @@
 import os
+import sys
 import argparse
 
 import sh
@@ -67,3 +68,18 @@ def create(volume_root=None, **kwargs):
     vols = volume.lookup_volumes()
     for vol in vols:
         volume.create(volume_root, vols)
+
+
+def singularity_gpu(**kwargs):
+    singularity = sh.Command('singularity')
+    vol = '/usr/local/gpucrate/352.93'
+    env = os.environ.copy()
+    env['PATH'] = '/usr/local/nvidia/bin:' + env.get('PATH', '')
+    env['LD_LIBRARY_PATH'] = '/usr/local/nvidia/lib64:/usr/local/nvidia/lib'
+    env['LD_LIBRARY_PATH'] += env.get('LD_LIBRARY_PATH', '')
+    env['SINGULARITY_BINDPATH'] = "{}:/usr/local/nvidia".format(vol)
+    args = sys.argv[1:]
+    try:
+        singularity(*args, _env=env, _fg=True)
+    except sh.ErrorReturnCode as e:
+        exit(e.exit_code)

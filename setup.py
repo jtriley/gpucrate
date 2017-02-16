@@ -36,6 +36,7 @@ setup(
     ],
     entry_points=dict(console_scripts=[
         'gpucrate = gpucrate.cli:main',
+        'singularity-gpu = gpucrate.cli:singularity_gpu',
     ]),
     include_package_data=True,
     package_data={

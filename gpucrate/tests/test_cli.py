@@ -17,6 +17,10 @@ NON_ROOT = mock.MagicMock(return_value=1)
 PDB = mock.MagicMock()
 PDB.set_trace = mock.MagicMock(side_effect=sys.exit)
 SHELL = mock.MagicMock()
+FAKE_ERROR_RETURN_CODE = sh.ErrorReturnCode('fake_cmd', '', '')
+FAKE_ERROR_RETURN_CODE.exit_code = 777
+SINGULARITY = mock.MagicMock(
+    side_effect=FAKE_ERROR_RETURN_CODE)
 
 
 def test_cli_help():
@@ -121,3 +125,10 @@ def test_create_volume_root_dne():
          'INFO',
          'Volume root {vroot} does not exist'.format(vroot=vroot))
     )
+
+
+@mock.patch.object(sh, 'Command', mock.MagicMock(return_value=SINGULARITY))
+def test_singularity_gpu():
+    with pytest.raises(SystemExit) as excinfo:
+        cli.singularity_gpu()
+    assert excinfo.value.code == FAKE_ERROR_RETURN_CODE.exit_code
