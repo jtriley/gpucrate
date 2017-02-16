@@ -1,7 +1,6 @@
 import os
 
-import distutils.spawn
-
+import sh
 import pynvml
 
 from gpucrate.logger import log
@@ -20,7 +19,7 @@ def which(prog):
     """
     Returns realpath of program
     """
-    return os.path.realpath(distutils.spawn.find_executable(prog))
+    return os.path.realpath(sh.Command(prog)._path)
 
 
 def shell(local_ns={}):
