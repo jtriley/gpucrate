@@ -109,7 +109,7 @@ def test_create_root_required():
 @mock.patch.object(os, 'geteuid', ROOT)
 @mock.patch.object(config, '_CONFIG', config._CONFIG.copy())
 @mock.patch.object(cli.volume, 'lookup_volumes',
-                   mock.MagicMock(return_value=[None]))
+                   mock.MagicMock(return_value={}))
 @mock.patch.object(cli.volume, 'create',
                    mock.MagicMock())
 def test_create_volume_root_dne():

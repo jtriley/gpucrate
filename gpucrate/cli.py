@@ -67,7 +67,7 @@ def create(volume_root=None, **kwargs):
         os.makedirs(volume_root)
     vols = volume.lookup_volumes()
     for vol in vols:
-        volume.create(volume_root, vol)
+        volume.create(volume_root, vols[vol])
 
 
 def singularity_gpu(**kwargs):
