@@ -1,6 +1,7 @@
 import os
 import yaml
 
+from gpucrate import exception
 from gpucrate.logger import log
 
 _LOADED = False
@@ -24,3 +25,10 @@ def get(key, path=DEFAULT_CONFIG_PATH):
     if not _LOADED:
         load(path=path)
     return _CONFIG.get(key)
+
+
+def get_volume_root():
+    vroot = os.environ.get('GPUCRATE_VOLUME_ROOT') or get('volume_root')
+    if not vroot:
+        raise exception.NoVolumeRoot
+    return vroot
