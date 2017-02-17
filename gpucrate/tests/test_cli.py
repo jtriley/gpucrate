@@ -19,8 +19,11 @@ PDB.set_trace = mock.MagicMock(side_effect=sys.exit)
 SHELL = mock.MagicMock()
 FAKE_ERROR_RETURN_CODE = sh.ErrorReturnCode('fake_cmd', '', '')
 FAKE_ERROR_RETURN_CODE.exit_code = 777
-SINGULARITY = mock.MagicMock(
-    side_effect=FAKE_ERROR_RETURN_CODE)
+FAKE_RESULT = mock.MagicMock()
+FAKE_RESULT.stdout = 'FAKE_ENV=test'
+SINGULARITY = mock.MagicMock(return_value=FAKE_RESULT)
+TEST_DRIVER_VERSION = '367.48'
+GPU_WRAP_SINGULARITY = mock.MagicMock()
 
 
 def test_help():
@@ -109,7 +112,7 @@ def test_create_root_required():
 @mock.patch.object(os, 'geteuid', ROOT)
 @mock.patch.object(config, '_CONFIG', config._CONFIG.copy())
 @mock.patch.object(cli.volume, 'lookup_volumes',
-                   mock.MagicMock(return_value={}))
+                   mock.MagicMock(return_value={'fake': {}}))
 @mock.patch.object(cli.volume, 'create',
                    mock.MagicMock())
 def test_create_volume_root_dne():
@@ -123,12 +126,73 @@ def test_create_volume_root_dne():
     log_capture.check(
         ('gpucrate',
          'INFO',
-         'Volume root {vroot} does not exist'.format(vroot=vroot))
+         'Volume root {vroot} does not exist - creating'.format(vroot=vroot))
+    )
+
+
+@mock.patch.object(os.path, 'isdir', mock.MagicMock(return_value=True))
+@mock.patch.object(cli.utils, 'get_driver_version',
+                   mock.MagicMock(return_value=TEST_DRIVER_VERSION))
+@mock.patch.object(sh, 'Command', mock.MagicMock(return_value=SINGULARITY))
+def test_singularity_gpu_success():
+    SINGULARITY.reset_mock()
+    kwargs = dict(args='exec -B /some/path:/some/path c.img'.split())
+    cli.singularity_gpu(**kwargs)
+    assert SINGULARITY.call_count == 2
+
+
+@mock.patch.object(os.path, 'isdir', mock.MagicMock(return_value=True))
+@mock.patch.object(cli.utils, 'get_driver_version',
+                   mock.MagicMock(return_value=TEST_DRIVER_VERSION))
+@mock.patch.object(sh, 'Command', mock.MagicMock(return_value=SINGULARITY))
+def test_singularity_gpu_failure():
+    SINGULARITY.reset_mock()
+    kwargs = dict(args='exec -B /some/path:/some/path c.img'.split())
+    cli.singularity_gpu(**kwargs)
+    assert SINGULARITY.call_count == 2
+
+
+@mock.patch.object(cli.utils, 'get_driver_version',
+                   mock.MagicMock(return_value=TEST_DRIVER_VERSION))
+@mock.patch.object(sh, 'Command', mock.MagicMock(return_value=SINGULARITY))
+def test_singularity_gpu_volume_dne():
+    with pytest.raises(SystemExit):
+        with testfixtures.LogCapture() as log_capture:
+            with testfixtures.TempDirectory() as d:
+                vroot = os.path.join(d.path, 'vroot')
+                vol = os.path.join(vroot, TEST_DRIVER_VERSION)
+                d.write('config', 'volume_root: {vroot}'.format(vroot=vroot))
+                config.load(path=os.path.join(d.path, 'config'))
+                SINGULARITY.reset_mock()
+                cli.singularity_gpu(
+                    args='exec -B /some/path:/some/path c.img'.split())
+
+    log_capture.check(
+        ('gpucrate',
+         'ERROR',
+         'volume {vol} does not exist - run "gpucrate create"'.format(vol=vol))
     )
 
 
 @mock.patch.object(sh, 'Command', mock.MagicMock(return_value=SINGULARITY))
-def test_singularity_gpu():
-    with pytest.raises(SystemExit) as excinfo:
-        cli.singularity_gpu()
+@mock.patch.object(cli, 'gpu_wrap_singularity', GPU_WRAP_SINGULARITY)
+def test_singularity_gpu_parse_fail():
+    GPU_WRAP_SINGULARITY.reset_mock()
+    kwargs = dict(args='this should fail all over'.split())
+    cli.singularity_gpu(**kwargs)
+    GPU_WRAP_SINGULARITY.assert_called_once()
+    assert GPU_WRAP_SINGULARITY.call_args[0][0] is None
+
+
+@mock.patch.object(sh, 'Command', mock.MagicMock(return_value=SINGULARITY))
+@mock.patch.object(os.path, 'isdir', mock.MagicMock(return_value=True))
+@mock.patch.object(cli.utils, 'get_driver_version',
+                   mock.MagicMock(return_value=TEST_DRIVER_VERSION))
+def test_singularity_gpu_fail():
+    with mock.patch.object(SINGULARITY, 'side_effect', FAKE_ERROR_RETURN_CODE):
+        with pytest.raises(SystemExit) as excinfo:
+            SINGULARITY.reset_mock()
+            GPU_WRAP_SINGULARITY.reset_mock()
+            kwargs = dict(args='exec -B /path:/path c.img'.split())
+            cli.singularity_gpu(**kwargs)
     assert excinfo.value.code == FAKE_ERROR_RETURN_CODE.exit_code
