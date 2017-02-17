@@ -25,10 +25,6 @@ def get_gpucrate_parser():
                         help='enable debug output')
     subparsers = parser.add_subparsers()
     create_parser = subparsers.add_parser('create')
-    create_parser.add_argument(
-        '--volume-root', required=False,
-        help='path where GPU driver volumes are created'
-    )
     create_parser.set_defaults(func=create)
     shell_parser = subparsers.add_parser('shell')
     shell_parser.set_defaults(func=shell)
@@ -54,8 +50,8 @@ def main(**kwargs):
         exit(1)
 
 
-def create(volume_root=None, **kwargs):
-    volume_root = (volume_root or os.environ.get('GPUCRATE_VOLUME_ROOT') or
+def create(**kwargs):
+    volume_root = (os.environ.get('GPUCRATE_VOLUME_ROOT') or
                    config.get('volume_root'))
     if not volume_root:
         raise exception.NoVolumeRoot
