@@ -1,12 +1,7 @@
 #!/usr/bin/env python
-import os
-
 from setuptools import setup, find_packages
 
 VERSION = 0.1
-version = os.path.join('gpucrate', '__init__.py')
-execfile(version)
-
 README = open('README.md').read()
 
 setup(
