@@ -79,64 +79,19 @@ def main(**kwargs):
         exit(1)
 
 
-def add_common_args(parser):
-    parser.add_argument('-B', '--bind', action="append")
-    parser.add_argument('-c', '--contain', action='store_true')
-    parser.add_argument('-C', '--containall', action='store_true')
-    parser.add_argument('-H', '--home')
-    parser.add_argument('-i', '--ipc', action='store_true')
-    parser.add_argument('-p', '--pid', action='store_true')
-    parser.add_argument('--pwd', action='store_true')
-    parser.add_argument('-S', '--scratch')
-    parser.add_argument('-u', '--user', action='store_true')
-    parser.add_argument('-W', '--workdir')
-    parser.add_argument('-w', '--writable', action='store_true')
-
-
-def get_singularity_gpu_parser():
-    parser = utils.SilentParser()
-    parser.add_argument('-d', '--debug')
-    subparsers = parser.add_subparsers()
-
-    run_parser = subparsers.add_parser('run')
-    add_common_args(run_parser)
-    run_parser.add_argument('container')
-    run_parser.add_argument('vargs', nargs='*')
-
-    exec_parser = subparsers.add_parser('exec')
-    add_common_args(exec_parser)
-    exec_parser.add_argument('container')
-    exec_parser.add_argument('vargs', nargs='*')
-
-    shell_parser = subparsers.add_parser('shell')
-    add_common_args(shell_parser)
-    shell_parser.add_argument('container')
-
-    test_parser = subparsers.add_parser('test')
-    test_parser.add_argument('container')
-
-    return parser
-
-
-def gpu_wrap_singularity(container, env_file, singularity=None):
+def gpu_wrap_singularity(env_file):
+    driver_version = utils.get_driver_version()
+    volume_root = config.get_volume_root()
+    vol = os.path.join(volume_root, driver_version)
+    if not os.path.isdir(vol):
+        raise exception.VolumeDoesNotExist(vol)
     bind_paths = []
-    container_env = None
-    singularity = singularity or sh.Command('singularity')
-    bind_paths = bind_paths or []
-    if container:
-        driver_version = utils.get_driver_version()
-        volume_root = config.get_volume_root()
-        vol = os.path.join(volume_root, driver_version)
-        if not os.path.isdir(vol):
-            raise exception.VolumeDoesNotExist(vol)
-        container_env = singularity("exec {container} cat /environment".format(
-            container=container).split()).stdout
-        container_env += NVENV
-        env_file.write(container_env)
-        env_file.flush()
-        bind_paths.append("{vol}:/usr/local/nvidia".format(vol=vol))
-        bind_paths.append("{env}:/environment".format(env=env_file.name))
-
+    singularity = sh.Command('singularity')
+    env_file.write(NVENV)
+    env_file.flush()
+    bind_paths.append("{vol}:/usr/local/nvidia".format(vol=vol))
+    bind_paths.append(
+        "{env}:/.singularity.d/env/99-gpucrate.sh".format(env=env_file.name))
     env = os.environ.copy()
     if bind_paths:
         env['SINGULARITY_BINDPATH'] = ','.join(bind_paths)
@@ -145,19 +100,9 @@ def gpu_wrap_singularity(container, env_file, singularity=None):
 
 def singularity_gpu(**kwargs):
     logger.configure_gpucrate_logging()
-    singularity = sh.Command('singularity')
-    parser = get_singularity_gpu_parser()
-    container = None
-
-    try:
-        args = parser.parse_args(args=kwargs.pop('args', None))
-        container = args.container
-    except SystemExit:
-        pass
-
     try:
         with tempfile.NamedTemporaryFile() as f:
-            gpu_wrap_singularity(container, f, singularity=singularity)
+            gpu_wrap_singularity(f)
     except exception.GpuCrateException as e:
         logger.log.error(e.message)
         exit(1)

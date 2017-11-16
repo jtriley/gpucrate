@@ -138,7 +138,7 @@ def test_singularity_gpu_success():
     SINGULARITY.reset_mock()
     kwargs = dict(args='exec -B /some/path:/some/path c.img'.split())
     cli.singularity_gpu(**kwargs)
-    assert SINGULARITY.call_count == 2
+    assert SINGULARITY.call_count == 1
 
 
 @mock.patch.object(os.path, 'isdir', mock.MagicMock(return_value=True))
@@ -149,7 +149,7 @@ def test_singularity_gpu_failure():
     SINGULARITY.reset_mock()
     kwargs = dict(args='exec -B /some/path:/some/path c.img'.split())
     cli.singularity_gpu(**kwargs)
-    assert SINGULARITY.call_count == 2
+    assert SINGULARITY.call_count == 1
 
 
 @mock.patch.object(cli.utils, 'get_driver_version',
@@ -172,16 +172,6 @@ def test_singularity_gpu_volume_dne():
          'ERROR',
          'volume {vol} does not exist - run "gpucrate create"'.format(vol=vol))
     )
-
-
-@mock.patch.object(sh, 'Command', mock.MagicMock(return_value=SINGULARITY))
-@mock.patch.object(cli, 'gpu_wrap_singularity', GPU_WRAP_SINGULARITY)
-def test_singularity_gpu_parse_fail():
-    GPU_WRAP_SINGULARITY.reset_mock()
-    kwargs = dict(args='this should fail all over'.split())
-    cli.singularity_gpu(**kwargs)
-    GPU_WRAP_SINGULARITY.assert_called_once()
-    assert GPU_WRAP_SINGULARITY.call_args[0][0] is None
 
 
 @mock.patch.object(sh, 'Command', mock.MagicMock(return_value=SINGULARITY))
