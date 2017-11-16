@@ -1,8 +1,5 @@
 # gpucrate
 
-**NOTE**: This project should ideally go away once singularity gets built-in
-support for this.
-
 [![build status](https://secure.travis-ci.org/jtriley/gpucrate.png?branch=master)](https://secure.travis-ci.org/jtriley/gpucrate)
 
 gpucrate creates hard-linked GPU driver (currently just NVIDIA) volumes for use
@@ -74,27 +71,30 @@ $ find /usr/local/gpucrate/367.48/
 ```
 
 ### Using with Singularity
-Singularity utilizes a setuid script to properly configure the container at
-runtime. Unfortunately this means we can't pass `$LD_LIBRARY_PATH` from outside
-of the container because it's an unsecure variable which gets stripped by
-glibc.
 
-I have a [PR to singularity](https://github.com/singularityware/singularity/pull/424)
-that enables securely passing these variables into the container's environment.
-Until that gets merged we need to update the environment file inside of the
-container if it doesn't already have `/usr/local/nvidia/{lib,lib64,bin}`
-folders in `$LD_LIBRARY_PATH` and `$PATH`. You can update a singularity
-container's environment file if necssary by running:
+**NOTE**: singularity-gpu requires Singularity 2.4+
+
+Once a volume has been created for the currently active driver you can now use
+the singularity wrapper `singularity-gpu` to run GPU-enabled containers.
+
+As an example lets convert the [tensorflow/tensorflow:latest-gpu](https://hub.docker.com/r/tensorflow/tensorflow/)
+docker image to a singularity image:
 
 ```
-$ sudo gpucrate prepare container.img
+$ singularity build tensorflow.img docker://tensorflow/tensorflow:latest-gpu
+
 ```
 
-Now we can run the container using the `singularity-gpu` wrapper installed by `gpucrate`:
-
+Now use the `singularity-gpu` wrapper to run any singularity command as normal
+only with the host's exact GPU driver linked in:
 
 ```
 $ singularity-gpu exec tensorflow.img python -c 'import tensorflow'
+I tensorflow/stream_executor/dso_loader.cc:108] successfully opened CUDA library libcublas.so locally
+I tensorflow/stream_executor/dso_loader.cc:108] successfully opened CUDA library libcudnn.so locally
+I tensorflow/stream_executor/dso_loader.cc:108] successfully opened CUDA library libcufft.so locally
+I tensorflow/stream_executor/dso_loader.cc:108] successfully opened CUDA library libcuda.so.1 locally
+I tensorflow/stream_executor/dso_loader.cc:108] successfully opened CUDA library libcurand.so locally
 ```
 
 ### Using with Docker
@@ -108,7 +108,7 @@ $ docker run -ti --rm --device=/dev/nvidiactl --device=/dev/nvidia-uvm --device=
 
 ## Configuration
 By default gpucrate creates driver volumes in `/usr/local/gpucrate`. You can
-configure this several ways:
+configure this two ways:
 
 **via config**:
 ```
@@ -119,4 +119,3 @@ echo 'volume_root: /path/to/volume/root' > /etc/gpucrate/config
 ```
 export GPUCRATE_VOLUME_ROOT=/path/to/volume/root
 ```
-
