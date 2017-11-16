@@ -1,8 +1,5 @@
 # gpucrate
 
-**NOTE**: This project should ideally go away once singularity gets built-in
-support for this.
-
 [![build status](https://secure.travis-ci.org/jtriley/gpucrate.png?branch=master)](https://secure.travis-ci.org/jtriley/gpucrate)
 
 gpucrate creates hard-linked GPU driver (currently just NVIDIA) volumes for use
