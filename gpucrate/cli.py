@@ -10,6 +10,7 @@ from gpucrate import config
 from gpucrate import logger
 from gpucrate import volume
 from gpucrate import exception
+from gpucrate import __version__
 
 
 NVENV = """
@@ -52,6 +53,7 @@ def get_gpucrate_parser():
     parser.add_argument('--debug', required=False,
                         action='store_true', default=False,
                         help='enable debug output')
+    parser.add_argument('--version', action='version', version=__version__)
     subparsers = parser.add_subparsers()
     create_parser = subparsers.add_parser('create')
     create_parser.set_defaults(func=create)
