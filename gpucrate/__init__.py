@@ -1,4 +1,2 @@
-import pkg_resources
-
-
-__version__ = pkg_resources.require(__name__)[0].version
+__author__ = 'Justin Riley'
+__version__ = '0.1.0'
