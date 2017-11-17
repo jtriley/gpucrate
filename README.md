@@ -70,8 +70,20 @@ $ find /usr/local/gpucrate/367.48/
 /usr/local/gpucrate/367.48/lib64/libnvidia-ifr.so.1
 ```
 
-### Using with Singularity
+By default gpucrate creates driver volumes in `/usr/local/gpucrate`. You can
+change this via gpucrate's config file:
 
+```
+echo 'volume_root: /path/to/volume/root' > /etc/gpucrate/config.yaml
+```
+
+or via the `GPUCRATE_VOLUME_ROOT` environment variable:
+
+```
+export GPUCRATE_VOLUME_ROOT="/path/to/volume/root"
+```
+
+### Using with Singularity
 **NOTE**: singularity-gpu requires Singularity 2.4+
 
 Once a volume has been created for the currently active driver you can now use
@@ -82,7 +94,6 @@ docker image to a singularity image:
 
 ```
 $ singularity build tensorflow.img docker://tensorflow/tensorflow:latest-gpu
-
 ```
 
 Now use the `singularity-gpu` wrapper to run any singularity command as normal
@@ -97,25 +108,45 @@ I tensorflow/stream_executor/dso_loader.cc:108] successfully opened CUDA library
 I tensorflow/stream_executor/dso_loader.cc:108] successfully opened CUDA library libcurand.so locally
 ```
 
+By default singularity-gpu injects the required environment for NVIDIA/CUDA
+inside the container at run time. If this causes issues or you'd like to
+disable this for any reason set the following in the gpucrate config file:
+
+```
+echo 'manage_environment: false' > /etc/gpucrate/config.yaml
+```
+
+or use the `GPUCRATE_MANAGE_ENVIRONMENT` environment variable:
+
+```
+export GPUCRATE_MANAGE_ENVIRONMENT="false"
+```
+
+#### Container Requirements
+The singularity-gpu wrapper uses the same conventions as NVIDIA's upstream
+docker containers:
+
+1. NVIDIA driver volume binds to /usr/local/nvidia inside the container
+2. CUDA lives in /usr/local/cuda
+
+If you have `enable overlay no` in your singularity config you'll need to
+ensure that /usr/local/nvidia exists inside the container before attempting to
+use `singularity-gpu`.
+
 ### Using with Docker
 It's much easier to just use [nvidia-docker](https://github.com/NVIDIA/nvidia-docker).
 If you still insist try this (not tested and you'll need to adjust the devices,
 volume root, and driver version for your system):
 
 ```
-$ docker run -ti --rm --device=/dev/nvidiactl --device=/dev/nvidia-uvm --device=/dev/nvidia3 --device=/dev/nvidia2 --device=/dev/nvidia1 --device=/dev/nvidia0 --volume-driver=nvidia-docker --volume=/usr/local/gpucrate/<driver_version>:/usr/local/nvidia:ro nvidia/cuda nvidia-smi
-```
-
-## Configuration
-By default gpucrate creates driver volumes in `/usr/local/gpucrate`. You can
-configure this two ways:
-
-**via config**:
-```
-echo 'volume_root: /path/to/volume/root' > /etc/gpucrate/config
-```
-
-**via environment variable**:
-```
-export GPUCRATE_VOLUME_ROOT=/path/to/volume/root
+$ docker run -ti --rm \
+--device=/dev/nvidiactl \
+--device=/dev/nvidia-uvm \
+--device=/dev/nvidia0 \
+--device=/dev/nvidia1 \
+--device=/dev/nvidia2
+--device=/dev/nvidia3 \
+--volume-driver=nvidia-docker \
+--volume=/usr/local/gpucrate/<driver_version>:/usr/local/nvidia:ro nvidia/cuda \
+nvidia-smi
 ```
