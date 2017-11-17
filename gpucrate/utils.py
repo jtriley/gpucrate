@@ -1,5 +1,4 @@
 import os
-import argparse
 
 import sh
 import pynvml
@@ -44,17 +43,3 @@ def debugger():
     except ImportError:
         import pdb
     return pdb
-
-
-class SilentParser(argparse.ArgumentParser):
-    """
-    Completely silent argparser
-    """
-    def error(self, *args, **kwargs):
-        exit(2)
-
-    def print_help(self, *args, **kwargs):
-        pass
-
-    def print_usage(self, *args, **kwargs):
-        pass
