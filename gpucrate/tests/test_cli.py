@@ -22,6 +22,7 @@ FAKE_ERROR_RETURN_CODE.exit_code = 777
 FAKE_RESULT = mock.MagicMock()
 FAKE_RESULT.stdout = 'FAKE_ENV=test'
 SINGULARITY = mock.MagicMock(return_value=FAKE_RESULT)
+SINGULARITY_FAIL = mock.MagicMock(side_effect=FAKE_ERROR_RETURN_CODE)
 TEST_DRIVER_VERSION = '367.48'
 GPU_WRAP_SINGULARITY = mock.MagicMock()
 
@@ -174,15 +175,35 @@ def test_singularity_gpu_volume_dne():
     )
 
 
-@mock.patch.object(sh, 'Command', mock.MagicMock(return_value=SINGULARITY))
+@mock.patch.object(sh, 'Command',
+                   mock.MagicMock(return_value=SINGULARITY_FAIL))
 @mock.patch.object(os.path, 'isdir', mock.MagicMock(return_value=True))
 @mock.patch.object(cli.utils, 'get_driver_version',
                    mock.MagicMock(return_value=TEST_DRIVER_VERSION))
 def test_singularity_gpu_fail():
-    with mock.patch.object(SINGULARITY, 'side_effect', FAKE_ERROR_RETURN_CODE):
-        with pytest.raises(SystemExit) as excinfo:
-            SINGULARITY.reset_mock()
-            GPU_WRAP_SINGULARITY.reset_mock()
-            kwargs = dict(args='exec -B /path:/path c.img'.split())
-            cli.singularity_gpu(**kwargs)
+    SINGULARITY_FAIL.reset_mock()
+    GPU_WRAP_SINGULARITY.reset_mock()
+    kwargs = dict(args='exec -B /path:/path c.img'.split())
+    with pytest.raises(SystemExit) as excinfo:
+        cli.singularity_gpu(**kwargs)
     assert excinfo.value.code == FAKE_ERROR_RETURN_CODE.exit_code
+
+
+@mock.patch.object(os.path, 'isdir', mock.MagicMock(return_value=True))
+@mock.patch.object(cli.utils, 'get_driver_version',
+                   mock.MagicMock(return_value=TEST_DRIVER_VERSION))
+@mock.patch.object(sh, 'Command', mock.MagicMock(return_value=SINGULARITY))
+@pytest.mark.parametrize("value", config._TRUTH.keys())
+def test_manage_env(value):
+    with mock.patch.object(cli, 'gpu_wrap_singularity', GPU_WRAP_SINGULARITY):
+        GPU_WRAP_SINGULARITY.reset_mock()
+        test_env = {'GPUCRATE_MANAGE_ENVIRONMENT': value}
+        with mock.patch.dict(os.environ, test_env):
+            cli.singularity_gpu()
+        if config._TRUTH[value]:
+            assert GPU_WRAP_SINGULARITY.call_args[0] is not None
+        else:
+            assert GPU_WRAP_SINGULARITY.call_args[0] is ()
+    env_file = mock.MagicMock()
+    cli.gpu_wrap_singularity(env_file)
+    assert env_file.write.call_args[0][0] == cli.NVENV

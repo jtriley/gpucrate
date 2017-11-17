@@ -82,7 +82,7 @@ def main(**kwargs):
         exit(1)
 
 
-def gpu_wrap_singularity(env_file):
+def gpu_wrap_singularity(env_file=None):
     driver_version = utils.get_driver_version()
     volume_root = config.get_volume_root()
     vol = os.path.join(volume_root, driver_version)
@@ -90,11 +90,12 @@ def gpu_wrap_singularity(env_file):
         raise exception.VolumeDoesNotExist(vol)
     bind_paths = []
     singularity = sh.Command('singularity')
-    env_file.write(NVENV)
-    env_file.flush()
+    if env_file:
+        env_file.write(NVENV)
+        env_file.flush()
+        env_bind = "{env}:/.singularity.d/env/99-gpucrate.sh"
+        bind_paths.append(env_bind.format(env=env_file.name))
     bind_paths.append("{vol}:/usr/local/nvidia".format(vol=vol))
-    bind_paths.append(
-        "{env}:/.singularity.d/env/99-gpucrate.sh".format(env=env_file.name))
     env = os.environ.copy()
     if bind_paths:
         env['SINGULARITY_BINDPATH'] = ','.join(bind_paths)
@@ -104,8 +105,11 @@ def gpu_wrap_singularity(env_file):
 def singularity_gpu(**kwargs):
     logger.configure_gpucrate_logging()
     try:
-        with tempfile.NamedTemporaryFile() as f:
-            gpu_wrap_singularity(f)
+        if config.get_manage_env():
+            with tempfile.NamedTemporaryFile() as f:
+                gpu_wrap_singularity(env_file=f)
+        else:
+            gpu_wrap_singularity()
     except exception.GpuCrateException as e:
         logger.log.error(e.message)
         exit(1)
