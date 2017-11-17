@@ -21,8 +21,9 @@ LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/nvidia/lib64
 LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/cuda/lib/:/usr/local/cuda/lib64/
 LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/cuda/extras/CUPTI/lib64/
 LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/cuda/lib64/include/
+LIBRARY_PATH="$LIBRARY_PATH:/usr/local/cuda/lib64/stubs"
 CUDA_HOME=/usr/local/cuda
-export PATH LD_LIBRARY_PATH CUDA_HOME
+export PATH LD_LIBRARY_PATH LIBRARY_PATH CUDA_HOME
 ### END NVIDIA AND CUDA PATHS
 """
 
