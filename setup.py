@@ -1,16 +1,24 @@
 #!/usr/bin/env python
+import os
+import re
+
 from setuptools import setup, find_packages
 
-VERSION = 0.1
+version_re = r'^__version__ = ["\']([^"\']*)["\']$'
+author_re = r'^__author__ = ["\'](.*)["\']$'
+
+INIT = open(os.path.join('gpucrate', '__init__.py')).read()
+version = re.search(version_re, INIT, re.M).group(1)
+author = re.search(author_re, INIT, re.M).group(1)
+
 README = open('README.md').read()
 
 setup(
     name='gpucrate',
-    version=VERSION,
+    version=version,
     packages=find_packages(),
-    author='Justin Riley',
-    author_email='justin_riley@harvard.edu',
-    url="https://github.com/fasrc/gpucrate",
+    author=author,
+    url="https://github.com/jtriley/gpucrate",
     description=("gpucrate creates hard-linked GPU driver volumes "
                  "for use with docker, singularity, etc."),
     long_description=README,
